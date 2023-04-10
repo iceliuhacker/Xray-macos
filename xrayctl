@@ -476,11 +476,12 @@ subscribe()
 	echo "Convert subscribe to xray:"
 	for NODE in $NODE_LIST; do
 		if [ -f conf/$NODE.xray ]; then
-			echo "Pass $NODE."
-			continue
+			SUB_ACT="Update"
+		else
+			SUB_ACT="Create"
 		fi
 		echo -e "protocol=vless\nallowInsecure=$allowInsecure" > conf/$NODE.xray || (echo "Pass $NODE:Error name!!!"; exit 1) || continue
-		echo "Create $NODE.xray..." | awk '{printf $0}'
+		echo "$SUB_ACT $NODE.xray..." | awk '{printf $0}'
 		NODE_INFO=`cat conf/.subscribe | grep "#${NODE}$" | sed -e 's@vless://@@' -e "s/#${NODE}$//"`
 		echo $NODE_INFO | tr -s '@?&' '\n' | awk '{
 			if (NR==1) print "id="$0;
