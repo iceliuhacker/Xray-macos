@@ -357,14 +357,16 @@ pass out quick route-to (lo0 ::1) inet6 proto {tcp,udp} from any to any port 53 
 EOF
 	sudo pfctl -e > /dev/null 2>&1
 	sudo pfctl -f conf/pf.xray.rules > /dev/null 2>&1 || (echo "PF firewall load Fail!!!"; sudo pfctl -f conf/pf.xray.rules; disable_tun; exit 1) || exit 1
-	sudo killall -HUP mDNSResponder 2>&1
+	dscacheutil -flushcache 2>&1
+	sudo dscacheutil -flushcache 2>&1
 	enable_proxy
 }
 
 disable_tun()
 {
 	sudo pfctl -dF all > /dev/null 2>&1
-	sudo killall -HUP mDNSResponder 2>&1
+	dscacheutil -flushcache 2>&1
+	sudo dscacheutil -flushcache 2>&1
 	sudo kill -9 `ps ax | grep "tun2socks -device tun://$_tun " | egrep -v 'grep|sudo' | awk '{print $1}'` > /dev/null 2>&1
 	disable_proxy
 }
