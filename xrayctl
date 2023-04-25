@@ -509,13 +509,14 @@ subscribe()
 
 update()
 {
-	ifconfig $_tun >/dev/null 2>&1 && SOCKS5='' || SOCKS5='--socks5 127.0.0.1:65080'
 	PID=`ps axwww | grep 'xray run -confdir run' | grep -v grep | awk '{printf $1}'`
 	if [ -z $PID ]; then
 		SOCKS5=''
+	else
+		SOCKS5='--socks5 127.0.0.1:65080'
 	fi
 	NOW_VERSION=`./xray version 2>/dev/null | awk '{if (NR>1) exit;printf "v"$2}'`
-	NEW_VERSION=`curl -sSL https://api.github.com/repos/XTLS/Xray-core/tags | grep name | awk -F'"' '{if (NR>1) exit;printf $4}'`
+	NEW_VERSION=`curl -sSL $SOCKS5 https://api.github.com/repos/XTLS/Xray-core/tags | grep name | awk -F'"' '{if (NR>1) exit;printf $4}'`
 	if [ "$NOW_VERSION" != "$NEW_VERSION" ] || [ "$NOW_VERSION" = "" ]; then
 		CPU=`uname -m`
 		if [ "$CPU" = "x86_64" ]; then
@@ -565,7 +566,7 @@ update()
 		NOW_MD5=`md5 $DAT | awk '{printf $NF}'`
 		NEW_MD5=$NOW_MD5
 		echo "Download $URL..." | awk '{printf $0}'
-		curl -skSL -w %{http_code} --retry 3 --connect-timeout 3 $URL -o $DAT.new | grep -q '^200$' &&\
+		curl -skSL $SOCKS5 -w %{http_code} --retry 3 --connect-timeout 3 $URL -o $DAT.new | grep -q '^200$' &&\
 			NEW_MD5=`md5 $DAT.new | awk '{printf $NF}'` && echo "done." || (echo "Fail!!!"; exit 1) || continue
 		if [ "$NEW_MD5" != "$NOW_MD5" ]; then
 			mv $DAT $DAT.old
